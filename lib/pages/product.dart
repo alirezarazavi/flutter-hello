@@ -1,41 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:hello/models/product.dart';
+import 'package:hello/scoped-models/main.dart';
 import 'package:hello/widgets/ui_elements/title_default.dart';
+import 'package:scoped_model/scoped_model.dart';
 
-class Product extends StatelessWidget {
-  final String title;
-  final String imageUrl;
-  final String price;
-  final String description;
+class ProductPage extends StatelessWidget {
+  final int productIndex;
 
-  Product(this.title, this.imageUrl, this.price, this.description);
+  ProductPage(this.productIndex);
 
-  _showWarningDialog(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Are you sure?'),
-            content: Text('Thia action connot be undone!'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('DISCARD'),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              FlatButton(
-                child: Text('CONTINUE'),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context, true);
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  Widget _buildAddressPriceRow() {
+  Widget _buildAddressPriceRow(double price) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -65,33 +39,34 @@ class Product extends StatelessWidget {
         Navigator.pop(context, false);
         return Future.value(false);
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(title),
-        ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Image.asset(imageUrl),
-            Container(
-              padding: EdgeInsets.all(10.0),
-              child: TitleDefault(title),
+      child: ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
+          final Product product = model.allProducts[productIndex];
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(product.title),
             ),
-            _buildAddressPriceRow(),
-            Container(
-              padding: EdgeInsets.all(10.0),
-              child: Text(
-                description,
-                textAlign: TextAlign.center,
-              ),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(product.image),
+                Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: TitleDefault(product.title),
+                ),
+                _buildAddressPriceRow(product.price),
+                Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    product.description,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-            RaisedButton(
-              color: Theme.of(context).accentColor,
-              child: Text('DELETE'),
-              onPressed: () => _showWarningDialog(context),
-            )
-          ],
-        ),
+          );
+        },
       ),
     );
   }
